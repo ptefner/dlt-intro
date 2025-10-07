@@ -1,0 +1,38 @@
+# Utiliser le dernier Ubuntu LTS
+FROM ubuntu:latest
+
+# Empêcher les prompts interactifs (=mute apt)
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Mettre à jour apt-get
+# Installe python + pip + venv
+# Supprime les fichiers .deb téléchargés (reduit la taille)
+# Supprime les listes de paquets (nettoie le cache)
+RUN apt-get update && \
+    apt-get install -y python3 python3-pip python3-venv && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+#WORKDIR /app
+
+# Créer un venv
+# Environnement virtuelle pour ne pas toucher à l'installation systeme de python
+RUN python3 -m venv /opt/venv
+
+# Activer le venv et installer dlt
+RUN /opt/venv/bin/pip install --no-cache-dir --upgrade pip && \
+    /opt/venv/bin/pip install --no-cache-dir dlt
+
+# Ajouter le venv au PATH
+ENV PATH="/opt/venv/bin:$PATH"
+
+#RUN mkdir -p /app/data
+#WORKDIR /app
+
+# Copier ton projet
+#COPY . /app
+
+# Déclarer le volume (optionnel mais recommandé)
+#VOLUME ["/app/data"]
+
+CMD ["dlt"]
