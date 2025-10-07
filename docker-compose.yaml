@@ -1,0 +1,28 @@
+services:
+  dlt:
+    build:
+      context: .
+      dockerfile: dockerfile.dlt
+    container_name: dlt_app
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: postgres://dlt_user:secret@postgres:5432/dlt_db
+    volumes:
+      - .:/app
+    command: ["dlt", "--help"]
+    tty: true
+
+  postgres:
+    build:
+      context: .
+      dockerfile: dockerfile.postgres
+    container_name: dlt_postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
