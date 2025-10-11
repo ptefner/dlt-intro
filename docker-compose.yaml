@@ -1,23 +1,58 @@
 services:
-  dlt:
+
+  python-script:
     build:
       context: .
-      dockerfile: dockerfile.dlt
-    container_name: dlt_app
-    depends_on:
-      - postgres
-    environment:
-      DATABASE_URL: postgres://dlt_user:secret@postgres:5432/dlt_db
+      dockerfile: dockerfile.python
+    user: "${UID}:${GID}"
+    container_name: python-runner
     volumes:
-      - .:/app
-    command: ["dlt", "--help"]
-    tty: true
+      - ./pydata:/app                 # partage tout le dossier du projet
+      - ./pydata/data:/app/data       # partage uniquement le dossier data (optionnel)
+      - ./pydata/logs:/app/logs       # dossier de logs partagé
+    command: python3 /app/script.py
+
+  dlt-init:
+    build:
+      context: .
+      dockerfile: dockerfile.dlt2
+    user: "${UID}:${GID}"
+    container_name: dlt-init
+    #depends_on:
+    #  - postgres
+    #environment:
+    #  DATABASE_URL: postgres://dlt_user:secret@postgres:5432/dlt_db
+    volumes:
+      - ./dltdata:/app                 # partage tout le dossier du projet
+      - ./dltdata/data:/app/data       # partage uniquement le dossier data (optionnel)
+      - ./dltdata/logs:/app/logs       # dossier de logs partagé
+    #command: ["dlt", "init", "filesystem", "duckdb"]
+    #command: ["python3", "filesystem_pipeline.py"]
+    #command: ["python3", "filesystem_pipeline.py"]
+    command: ["python3", "showdb.py"]
+
+  dlt-run:
+    build:
+      context: .
+      dockerfile: dockerfile.dlt2
+    user: "${UID}:${GID}"
+    container_name: dlt-runner
+    #depends_on:
+    #  - postgres
+    #environment:
+    #  DATABASE_URL: postgres://dlt_user:secret@postgres:5432/dlt_db
+    volumes:
+      - ./dltdata:/app                 # partage tout le dossier du projet
+      - ./dltdata/data:/app/data       # partage uniquement le dossier data (optionnel)
+      - ./dltdata/logs:/app/logs       # dossier de logs partagé
+    command: ["dlt", "run", "filesystem_pipeline"]
 
   postgres:
     build:
       context: .
       dockerfile: dockerfile.postgres
-    container_name: dlt_postgres
+    user: "${UID}:${GID}"
+    container_name: dlt-postgres
     restart: always
     ports:
       - "5432:5432"
@@ -25,4 +60,6 @@ services:
       - pgdata:/var/lib/postgresql/data
 
 volumes:
+  dltdata:
+    driver: local
   pgdata:

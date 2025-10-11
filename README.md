@@ -4,13 +4,14 @@ decouverte de dlt
 # documentation dtl
 https://dlthub.com/docs/intro
 
-#documentation installation
+# documentation installation
 https://dlthub.com/docs/reference/installation
 
-
-# build image dlt
->cd docker-dlt
->sudo docker build -t my-image-dlt .
+# build la composition
+sudo docker compose up --build
 
 # run a container puis le supprime
->sudo docker run --rm mon_image_python
+sudo docker run -it --rm dlt-intro-dlt
+
+# nettoyer/supprimer les images
+sudo docker system prune -a

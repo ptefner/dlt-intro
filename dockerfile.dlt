@@ -1,5 +1,5 @@
 # Utiliser le dernier Ubuntu LTS
-FROM ubuntu:latest
+FROM ubuntu:24.04
 
 # Empêcher les prompts interactifs (=mute apt)
 ENV DEBIAN_FRONTEND=noninteractive
@@ -13,26 +13,25 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-#WORKDIR /app
-
 # Créer un venv
 # Environnement virtuelle pour ne pas toucher à l'installation systeme de python
 RUN python3 -m venv /opt/venv
 
+
+#RUN mkdir -p /app/data
+WORKDIR /app
+COPY requirements.txt .
+
 # Activer le venv et installer dlt
 RUN /opt/venv/bin/pip install --no-cache-dir --upgrade pip && \
-    /opt/venv/bin/pip install --no-cache-dir dlt
+    /opt/venv/bin/pip install --no-cache-dir -r requirements.txt
 
 # Ajouter le venv au PATH
 ENV PATH="/opt/venv/bin:$PATH"
 
-#RUN mkdir -p /app/data
-#WORKDIR /app
-
-# Copier ton projet
-#COPY . /app
+#WORKDIR /usr/local/app
 
 # Déclarer le volume (optionnel mais recommandé)
-#VOLUME ["/app/data"]
+VOLUME ["/app/data"]
 
-CMD ["dlt"]
+ENTRYPOINT ["dlt"]

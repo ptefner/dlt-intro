@@ -3,7 +3,7 @@ FROM postgres:16
 
 # Définir variables d'environnement par défaut
 ENV POSTGRES_USER=dlt_user
-ENV POSTGRES_PASSWORD=secret
+ENV POSTGRES_PASSWORD=dlt_secret
 ENV POSTGRES_DB=dlt_db
 
 # Copier des scripts d'initialisation (SQL ou sh) si tu veux précharger la DB
