@@ -1,0 +1,14 @@
+# Partir de l'image officielle Postgres
+FROM postgres:18
+
+# Mise à jour
+RUN apt-get update \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copie les scripts SQL d’initialisation (optionnel)
+# tout fichier .sql ou .sh dans /docker-entrypoint-initdb.d/ sera exécuté au 1er démarrage
+COPY sql/ /docker-entrypoint-initdb.d/
+
+# Expose le port PostgreSQL
+EXPOSE 5432

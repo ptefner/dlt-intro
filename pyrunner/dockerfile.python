@@ -1,0 +1,11 @@
+# Image de base officielle
+FROM python:3.12-slim
+
+# Définir le dossier de travail
+WORKDIR /app
+
+# Mise à jour
+RUN apt-get update && apt-get install -y --no-install-recommends python3-venv \
+    && python3 -m venv /opt/venv \
+    && . /opt/venv/bin/activate \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*

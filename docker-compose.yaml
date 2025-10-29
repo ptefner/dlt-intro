@@ -1,20 +1,53 @@
 services:
-
-  python-script:
+  python-runner:
     build:
-      context: .
+      context: ./pyrunner
       dockerfile: dockerfile.python
-    user: "${UID}:${GID}"
     container_name: python-runner
+    user: "${UID}:${GID}"
+    env_file:
+      - .env
     volumes:
-      - ./pydata:/app                 # partage tout le dossier du projet
-      - ./pydata/data:/app/data       # partage uniquement le dossier data (optionnel)
-      - ./pydata/logs:/app/logs       # dossier de logs partagé
+      - ./pyrunner:/app                 # partage tout le dossier du projet
+      - ./datas/pyrunner:/app/datas     # partage uniquement le dossier data (optionnel)
+      - ./logs/pyrunner:/app/logs       # dossier de logs partagé
     command: python3 /app/script.py
-
+  postgres-dwh:
+    build:
+      context: ./pgdwh
+      dockerfile: dockerfile.postgres
+    user: "${UID}:${GID}"
+    container_name: postgres-dwh
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres 
+      POSTGRES_DB: datawarehouse
+    #volumes:
+    #  - ./pgdwh/data:/var/lib/postgresql/data
+  postgres-admin:
+    image: dpage/pgadmin4
+    #user: "${UID}:${GID}"
+    container_name: postgres-admin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@local.fr
+      PGADMIN_DEFAULT_PASSWORD: pgadmin
+      #PGADMIN_MASTER_PASSWORD_REQUIRED: "False"
+      #GADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION: "False"
+      #PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      #PGADMIN_CONFIG_ENCRYPTION_KEY: "MaSuperClefDeChiffrement2025"
+    ports:
+      - "8080:80"
+    depends_on:
+      - postgres-dwh
+    volumes:
+      - ./pgadmin/servers.json:/pgadmin4/servers.json
   dlt-init:
     build:
-      context: .
+      context: ./pydlt
       dockerfile: dockerfile.dlt2
     user: "${UID}:${GID}"
     container_name: dlt-init
@@ -23,14 +56,13 @@ services:
     #environment:
     #  DATABASE_URL: postgres://dlt_user:secret@postgres:5432/dlt_db
     volumes:
-      - ./dltdata:/app                 # partage tout le dossier du projet
-      - ./dltdata/data:/app/data       # partage uniquement le dossier data (optionnel)
-      - ./dltdata/logs:/app/logs       # dossier de logs partagé
-    #command: ["dlt", "init", "filesystem", "duckdb"]
+      - ./pydlt:/app                 # partage tout le dossier du projet
+      - ./datas/pydlt:/app/datas     # partage uniquement le dossier data (optionnel)
+      - ./logs/pydlt:/app/logs       # dossier de logs partagé
+    command: ["dlt", "init", "filesystem", "duckdb"]
     #command: ["python3", "filesystem_pipeline.py"]
     #command: ["python3", "filesystem_pipeline.py"]
-    command: ["python3", "showdb.py"]
-
+    #command: ["python3", "showdb.py"]
   dlt-run:
     build:
       context: .
@@ -46,20 +78,6 @@ services:
       - ./dltdata/data:/app/data       # partage uniquement le dossier data (optionnel)
       - ./dltdata/logs:/app/logs       # dossier de logs partagé
     command: ["dlt", "run", "filesystem_pipeline"]
-
-  postgres:
-    build:
-      context: .
-      dockerfile: dockerfile.postgres
-    user: "${UID}:${GID}"
-    container_name: dlt-postgres
-    restart: always
-    ports:
-      - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-
 volumes:
   dltdata:
     driver: local
-  pgdata:
