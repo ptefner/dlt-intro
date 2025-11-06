@@ -2,7 +2,7 @@
 decouverte de dlt
 
 # documentation dtl
-https://dlthub.com/docs/intro
+https://dlthub.com/docs/intro <br>
 https://dlthub.com/docs/reference/installation
 
 # build la composition
@@ -29,5 +29,5 @@ docker stop $(docker ps -q) 2>/dev/null; docker rm -f $(docker ps -aq) 2>/dev/nu
 # ####################
 
 # documentation postgres admin
-PGADMIN_DEFAULT_PASSWORD : pgadmin
+PGADMIN_DEFAULT_PASSWORD: pgadmin <br>
 POSTGRES_PASSWORD: postgres
