@@ -1,5 +1,6 @@
 services:
   python-runner:
+    image: dlt-intro/python-runner:0.0.1
     build:
       context: ./pyrunner
       dockerfile: dockerfile.python
@@ -13,6 +14,7 @@ services:
       - ./logs/pyrunner:/app/logs       # dossier de logs partagé
     command: python3 /app/script.py
   postgres-dwh:
+    image: dlt-intro/postgres-dwh:0.0.1
     build:
       context: ./pgdwh
       dockerfile: dockerfile.postgres
